@@ -2,6 +2,7 @@ from dataparser import Data
 from optimizer import run_optimisation
 from score import score
 from solver import solve
+from zip_code import zip_code
 
 if __name__ == '__main__':
 
@@ -22,4 +23,6 @@ if __name__ == '__main__':
     data.write_if_best(task_score)
 
     run_optimisation(data, num_steps=10)
+
+    zip_code()
 
