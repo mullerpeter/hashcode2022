@@ -2,6 +2,31 @@ import json
 import os
 
 
+class Skill:
+    def __init__(self, name, level):
+        super(Skill, self).__init__()
+        self.name = name
+        self.level = level
+
+
+class Contributor:
+    def __init__(self, name, N):
+        super(Contributor, self).__init__()
+        self.name = name
+        self.N = N
+        self.skills = []
+
+
+class Project:
+    def __init__(self, name, D, S, B, R):
+        super(Project, self).__init__()
+        self.name = name
+        self.D = D
+        self.S = S
+        self.B = B
+        self.R = R
+        self.roles = []
+
 def check_create_directory(path):
     # Check whether the specified path exists or not
     exists = os.path.exists(path)
@@ -10,15 +35,36 @@ def check_create_directory(path):
         os.makedirs(path)
 
 def read_input_file(filename):
-    # TODO: Implement Input File Parsing
     file1 = open(filename, 'r')
-    something = []
-    c = int(file1.readline())
-    for _ in range(c):
-        line = file1.readline().split()
-        something.append(line)
+    cp_line = file1.readline().split()
+    C = int(cp_line[0])
+    P = int(cp_line[1])
+    contributors = []
+    for i in range(C):
+        contributor_line = file1.readline().split()
+        contributor_name = contributor_line[0]
+        N = int(contributor_line[1])
+        contributor = Contributor(contributor_name, N)
+        for j in range(N):
+            skill_line = file1.readline().split()
+            skill_name = skill_line[0]
+            skill_level = int(skill_line[1])
+            contributor.skills.append(Skill(skill_name, skill_level))
+        contributors.append(contributor)
+    projects = []
+    for i in range(P):
+        project_line = file1.readline().split()
+        project_name = project_line[0]
+        D, S, B, R = int(project_line[1]), int(project_line[2]), int(project_line[3]), int(project_line[4])
+        project = Project(project_name, D, S, B, R)
+        for j in range(R):
+            skill_line = file1.readline().split()
+            skill_name = skill_line[0]
+            skill_level = int(skill_line[1])
+            project.roles.append(Skill(skill_name, skill_level))
+        projects.append(project)
 
-    return something
+    return C, P, contributors, projects
 
 
 def read_output_file(filename):
@@ -26,13 +72,12 @@ def read_output_file(filename):
     file1 = open(filename, 'r')
     return file1.readline().split()[1:]
 
-
 class Data:
     def __init__(self, task_name):
         super(Data, self).__init__()
         self.task_name = task_name
 
-        self.something = read_input_file(f'input_data/{task_name}.in.txt')
+        self.C, self.P, self.contributors, self.projects = read_input_file(f'input_data/{task_name}.in.txt')
 
     def load_best_solution(self):
         self.something = read_output_file(f'submission/{self.task_name}.out.txt')
