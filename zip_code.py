@@ -2,7 +2,7 @@ from zipfile import ZipFile
 import os
 from os.path import basename
 
-excluded_directories = ['000_practice', 'input_data', 'runs', 'submissions', '__pycache__']
+excluded_directories = ['000_practice', 'input_data', 'runs', 'submissions', '__pycache__', 'venv']
 
 
 def zip_code():

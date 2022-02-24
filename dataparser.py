@@ -24,7 +24,12 @@ class Contributor:
         super(Contributor, self).__init__()
         self.name = name
         self.N = N
+        self.temp_skill_increase = None
         self.skills = []
+
+    def get_score(self):
+        return np.sum(self.skills)
+
 
 
 class Project:
@@ -36,6 +41,9 @@ class Project:
         self.B = B
         self.R = R
         self.roles = []
+
+    def get_score(self):
+        return self.S
 
 def check_create_directory(path):
     # Check whether the specified path exists or not
@@ -100,7 +108,7 @@ class Data:
     def __init__(self, task_name):
         super(Data, self).__init__()
         self.task_name = task_name
-
+        self.solution = None
         self.C, self.P, self.contributors, self.projects, self.all_skills = read_input_file(f'input_data/{task_name}.in.txt')
 
     def load_best_solution(self):
@@ -138,5 +146,9 @@ class Data:
         if path is None:
             path = f'submission/{self.task_name}.out.txt'
         out_file = open(path, "w")
-        out_file.write("Something")
+        out_file.write(f'{len(self.solution)}\n')
+        for project in self.solution:
+            out_file.write(f'{project.name}\n')
+            names = [role.assigned.name for role in project.roles]
+            out_file.write(f'{" ".join(names)}\n')
         out_file.close()
