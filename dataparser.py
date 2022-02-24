@@ -26,9 +26,11 @@ class Contributor:
         self.N = N
         self.temp_skill_increase = None
         self.skills = []
+        self.work_time = 0
 
     def get_score(self):
-        return np.sum(self.skills)
+        return np.sum(self.skills) + self.work_time
+
 
 
 
@@ -43,7 +45,7 @@ class Project:
         self.roles = []
 
     def get_score(self):
-        return self.S
+        return -self.B
 
 def check_create_directory(path):
     # Check whether the specified path exists or not

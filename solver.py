@@ -58,6 +58,7 @@ def solve_peter(data: Data):
                 current_people.append(role.assigned.name)
         if all_good:
             for con in [role.assigned for role in data.projects[project_index].roles]:
+                con.work_time += data.projects[project_index].D
                 if con.temp_skill_increase is not None:
                     con.skills[con.temp_skill_increase] += 1
                     con.temp_skill_increase = None
@@ -83,6 +84,7 @@ def solve_peter(data: Data):
                     current_people.append(role.assigned.name)
             if all_good:
                 for con in [role.assigned for role in data.projects[project_index].roles]:
+                    con.work_time += data.projects[project_index].D
                     if con.temp_skill_increase is not None:
                         con.skills[con.temp_skill_increase] += 1
                         con.temp_skill_increase = None
