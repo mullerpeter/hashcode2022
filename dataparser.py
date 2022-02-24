@@ -1,5 +1,6 @@
 import json
 import os
+import numpy as np
 
 
 class Skill:
@@ -7,6 +8,15 @@ class Skill:
         super(Skill, self).__init__()
         self.name = name
         self.level = level
+
+
+class Role:
+    def __init__(self, name, level):
+        super(Role, self).__init__()
+        self.name = name
+        self.skill_index = None
+        self.level = level
+        self.assigned = None
 
 
 class Contributor:
@@ -40,6 +50,7 @@ def read_input_file(filename):
     C = int(cp_line[0])
     P = int(cp_line[1])
     contributors = []
+    all_skills = []
     for i in range(C):
         contributor_line = file1.readline().split()
         contributor_name = contributor_line[0]
@@ -48,6 +59,7 @@ def read_input_file(filename):
         for j in range(N):
             skill_line = file1.readline().split()
             skill_name = skill_line[0]
+            all_skills.append(skill_name)
             skill_level = int(skill_line[1])
             contributor.skills.append(Skill(skill_name, skill_level))
         contributors.append(contributor)
@@ -60,11 +72,23 @@ def read_input_file(filename):
         for j in range(R):
             skill_line = file1.readline().split()
             skill_name = skill_line[0]
+            all_skills.append(skill_name)
             skill_level = int(skill_line[1])
-            project.roles.append(Skill(skill_name, skill_level))
+            project.roles.append(Role(skill_name, skill_level))
         projects.append(project)
 
-    return C, P, contributors, projects
+    all_skills = list(set(all_skills))
+    for contributor in contributors:
+        all_skill_levels = np.zeros(len(all_skills))
+        for skill in contributor.skills:
+            all_skill_levels[all_skills.index(skill.name)] = skill.level
+        contributor.skills = all_skill_levels
+
+    for project in projects:
+        for role in project.roles:
+            role.skill_index = all_skills.index(role.name)
+
+    return C, P, contributors, projects, all_skills
 
 
 def read_output_file(filename):
@@ -77,7 +101,7 @@ class Data:
         super(Data, self).__init__()
         self.task_name = task_name
 
-        self.C, self.P, self.contributors, self.projects = read_input_file(f'input_data/{task_name}.in.txt')
+        self.C, self.P, self.contributors, self.projects, self.all_skills = read_input_file(f'input_data/{task_name}.in.txt')
 
     def load_best_solution(self):
         self.something = read_output_file(f'submission/{self.task_name}.out.txt')
