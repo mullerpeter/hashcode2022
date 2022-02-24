@@ -1,0 +1,4 @@
+networkx==2.6.3
+numpy==1.22.2
+pyspark==2.4.6
+tqdm==4.62.3
