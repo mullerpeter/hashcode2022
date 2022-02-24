@@ -44,6 +44,7 @@ def solve_peter(data: Data):
     project_scores = [project.get_score() for project in data.projects]
     sorted_scores_index = np.argsort(project_scores)[::-1]
     solution = []
+    second_try = []
     for project_index in tqdm(sorted_scores_index):
         all_good = True
         current_people = []
@@ -65,7 +66,34 @@ def solve_peter(data: Data):
             for con in [role.assigned for role in data.projects[project_index].roles]:
                 if con is not None:
                     con.temp_skill_increase = None
-
+            second_try.append(project_index)
+    while True:
+        original_second_try = list(second_try)
+        second_try = []
+        for project_index in tqdm(original_second_try):
+            all_good = True
+            current_people = []
+            current_skills = np.zeros(len(data.all_skills))
+            for role in data.projects[project_index].roles:
+                role.assigned = get_compatible_contributor(data, role, current_people, current_skills)
+                if role.assigned is None:
+                    all_good = False
+                else:
+                    current_skills = np.maximum(current_skills, role.assigned.skills)
+                    current_people.append(role.assigned.name)
+            if all_good:
+                for con in [role.assigned for role in data.projects[project_index].roles]:
+                    if con.temp_skill_increase is not None:
+                        con.skills[con.temp_skill_increase] += 1
+                        con.temp_skill_increase = None
+                solution.append(data.projects[project_index])
+            else:
+                for con in [role.assigned for role in data.projects[project_index].roles]:
+                    if con is not None:
+                        con.temp_skill_increase = None
+                second_try.append(project_index)
+        if len(original_second_try) == len(second_try):
+            break
     return solution
 
 
