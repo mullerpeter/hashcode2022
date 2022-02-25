@@ -45,7 +45,7 @@ class Project:
         self.roles = []
 
     def get_score(self):
-        return -self.B
+        return self.S / (self.D * self.R)
 
 def check_create_directory(path):
     # Check whether the specified path exists or not

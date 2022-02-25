@@ -10,6 +10,27 @@ def solve(data: Data):
 
 
 def get_compatible_contributor(data: Data, role: Role, current_people, current_skills):
+    possible_candidates = []
+    if current_skills[role.skill_index] >= role.level:
+        possible_candidates = []
+        for con in data.contributors:
+            if con.skills[role.skill_index] == role.level - 1 and con.name not in current_people:
+                possible_candidates.append(con)
+    for con in data.contributors:
+        if con.skills[role.skill_index] >= role.level and con.name not in current_people:
+            possible_candidates.append(con)
+
+    if len(possible_candidates) > 0:
+        canditate_scores = [con.get_score() for con in possible_candidates]
+        sorted_scores_index = np.argsort(canditate_scores)
+        con = possible_candidates[sorted_scores_index[0]]
+        if (current_skills[role.skill_index] >= role.level and con.skills[role.skill_index] == role.level - 1) or (con.skills[role.skill_index] == role.level):
+            con.temp_skill_increase = role.skill_index
+        return con
+
+    return None
+
+def get_compatible_contributor_old(data: Data, role: Role, current_people, current_skills):
     if current_skills[role.skill_index] >= role.level:
         possible_candidates = []
         for con in data.contributors:
@@ -45,6 +66,7 @@ def solve_peter(data: Data):
     sorted_scores_index = np.argsort(project_scores)[::-1]
     solution = []
     second_try = []
+    score = 0
     for project_index in tqdm(sorted_scores_index):
         all_good = True
         current_people = []
@@ -57,17 +79,22 @@ def solve_peter(data: Data):
                 current_skills = np.maximum(current_skills, role.assigned.skills)
                 current_people.append(role.assigned.name)
         if all_good:
-            for con in [role.assigned for role in data.projects[project_index].roles]:
-                con.work_time += data.projects[project_index].D
-                if con.temp_skill_increase is not None:
-                    con.skills[con.temp_skill_increase] += 1
-                    con.temp_skill_increase = None
-            solution.append(data.projects[project_index])
+            start_time = max([role.assigned.work_time for role in data.projects[project_index].roles])
+            if start_time + data.projects[project_index].D < data.projects[project_index].B + data.projects[project_index].S:
+                for con in [role.assigned for role in data.projects[project_index].roles]:
+                    con.work_time = start_time + data.projects[project_index].D
+                    if con.temp_skill_increase is not None:
+                        con.skills[con.temp_skill_increase] += 1
+                solution.append(data.projects[project_index])
+                if start_time + data.projects[project_index].D < data.projects[project_index].B:
+                    score += data.projects[project_index].S
+                else:
+                    score += data.projects[project_index].S - (start_time + data.projects[project_index].D - data.projects[project_index].B)
         else:
-            for con in [role.assigned for role in data.projects[project_index].roles]:
-                if con is not None:
-                    con.temp_skill_increase = None
             second_try.append(project_index)
+        for con in [role.assigned for role in data.projects[project_index].roles]:
+            if con is not None:
+                con.temp_skill_increase = None
     while True:
         original_second_try = list(second_try)
         second_try = []
@@ -83,12 +110,20 @@ def solve_peter(data: Data):
                     current_skills = np.maximum(current_skills, role.assigned.skills)
                     current_people.append(role.assigned.name)
             if all_good:
-                for con in [role.assigned for role in data.projects[project_index].roles]:
-                    con.work_time += data.projects[project_index].D
-                    if con.temp_skill_increase is not None:
-                        con.skills[con.temp_skill_increase] += 1
-                        con.temp_skill_increase = None
-                solution.append(data.projects[project_index])
+                start_time = max([role.assigned.work_time for role in data.projects[project_index].roles])
+                if start_time + data.projects[project_index].D < data.projects[project_index].B + data.projects[
+                    project_index].S:
+                    for con in [role.assigned for role in data.projects[project_index].roles]:
+                        con.work_time = start_time + data.projects[project_index].D
+                        if con.temp_skill_increase is not None:
+                            con.skills[con.temp_skill_increase] += 1
+                            con.temp_skill_increase = None
+                    solution.append(data.projects[project_index])
+                    if start_time + data.projects[project_index].D < data.projects[project_index].B:
+                        score += data.projects[project_index].S
+                    else:
+                        score += data.projects[project_index].S - (
+                                    start_time + data.projects[project_index].D - data.projects[project_index].B)
             else:
                 for con in [role.assigned for role in data.projects[project_index].roles]:
                     if con is not None:
@@ -96,6 +131,7 @@ def solve_peter(data: Data):
                 second_try.append(project_index)
         if len(original_second_try) == len(second_try):
             break
+    print("Score:", score)
     return solution
 
 
